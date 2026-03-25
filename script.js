@@ -36,8 +36,6 @@ const els = {
   orderCard: document.getElementById('orderCard'),
   orderVisual: document.getElementById('orderVisual'),
   tickBadge: document.getElementById('tickBadge'),
-  doneCount: document.getElementById('doneCount'),
-  orderCount: document.getElementById('orderCount'),
   next: document.getElementById('nextOrderBtn'),
   reset: document.getElementById('resetBtn'),
   level: document.getElementById('levelSelect'),
@@ -183,7 +181,6 @@ function renderCurrent() {
   buildVisual(els.orderVisual, state.current);
   els.orderCard.classList.toggle('done', state.current.done);
   els.next.disabled = !state.current.done;
-  els.orderCount.textContent = state.orderNumber;
 }
 
 function renderRibbon() {
@@ -225,7 +222,6 @@ function completeCurrent() {
   if (state.current.done) return;
   state.current.done = true;
   state.completed += 1;
-  els.doneCount.textContent = state.completed;
   state.ribbon.unshift({
     orderNumber: state.orderNumber,
     type: state.current.type,
@@ -246,8 +242,6 @@ function resetApp() {
   state.orderNumber = 1;
   state.completed = 0;
   state.ribbon = [];
-  els.doneCount.textContent = '0';
-  els.orderCount.textContent = '1';
   renderRibbon();
   closeReview();
   newOrder();
