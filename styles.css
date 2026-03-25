@@ -283,13 +283,14 @@ h1 {
 
 /* Fixed measure box so different source whitespace does not change size */
 .measure-img {
-  width: 165px;
-  height: 250px;
-  min-width: 165px;
-  min-height: 250px;
-  max-width: 165px;
-  max-height: 250px;
+  width: 200px;
+  height: 300px;
+  min-width: 200px;
+  min-height: 300px;
+  max-width: 200px;
+  max-height: 300px;
   object-fit: contain;
+  transform: scale(1.15);
 }
 
 .spirit-img {
