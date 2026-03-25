@@ -138,9 +138,6 @@ function buildVisual(target, order) {
   wrap.className = 'visual-wrap';
 
   const main = document.createElement('div');
-  main.className = 'visual-main';
-  order.media.forEach(entry => main.appendChild(createAsset(entry)));
-  wrap.appendChild(main);
 
   if (order.extras && order.extras.length) {
     const extras = document.createElement('div');
