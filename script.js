@@ -1,278 +1,289 @@
-const IMAGE_BASE = './images/drinks';
-
-const data = {
-  measures: {
-    single: `${IMAGE_BASE}/spirits/single.png`,
-    double: `${IMAGE_BASE}/spirits/double.png`,
+const IMG = {
+  spirits: {
+    single: 'images/drinks/spirits/single.png',
+    double: 'images/drinks/spirits/double.png',
+    bottles: {
+      gordons: 'images/drinks/spirits/gordons.png',
+      havana: 'images/drinks/spirits/havana.png',
+      jackdaniels: 'images/drinks/spirits/jackdaniels.png',
+      jamesons: 'images/drinks/spirits/jamesons.png',
+      kahlua: 'images/drinks/spirits/kahlua.png',
+      kraken: 'images/drinks/spirits/kraken.png',
+      makersmark: 'images/drinks/spirits/makersmark.png',
+      sailorjerry: 'images/drinks/spirits/sailorjerry.png',
+      smirnoff: 'images/drinks/spirits/smirnoff.png',
+    }
   },
-  spirits: [
-    'gordons', 'smirnoff', 'havana', 'kraken', 'makersmark', 'jamesons', 'sailorjerry', 'kahlua', 'jackdaniels'
-  ].map(name => ({ key: name, src: `${IMAGE_BASE}/spirits/${name}.png` })),
-  beers: [
-    'corona', 'madri', 'desperado'
-  ].map(name => ({ key: name, src: `${IMAGE_BASE}/beers/${name}.png` })),
-  mixers: [
-    'coke', 'lemonade'
-  ].map(name => ({ key: name, src: `${IMAGE_BASE}/mixers/${name}.png` })),
-  wines: [
-    'smallred', 'mediumred', 'largered', 'smallwhite', 'mediumwhite', 'largewhite'
-  ].map(name => ({ key: name, src: `${IMAGE_BASE}/wine/${name}.png` })),
+  beers: {
+    corona: 'images/drinks/beers/corona.png',
+    desperado: 'images/drinks/beers/desperado.png',
+    madri: 'images/drinks/beers/madri.png',
+  },
+  mixers: {
+    coke: 'images/drinks/mixers/coke.png',
+    lemonade: 'images/drinks/mixers/lemonade.png',
+  },
   extras: {
-    ice: `${IMAGE_BASE}/extras/ice.png`,
-    lemon: `${IMAGE_BASE}/extras/lemon.png`,
+    ice: 'images/drinks/extras/ice.png',
+    lemon: 'images/drinks/extras/lemon.png',
   },
+  wine: {
+    measure125: 'images/drinks/wine/measure-small-125.png',
+    measure175: 'images/drinks/wine/measure-medium-175.png',
+    measure250: 'images/drinks/wine/measure-large-250.png',
+    red: 'images/drinks/wine/red.png',
+    white: 'images/drinks/wine/white.png',
+    rose: 'images/drinks/wine/rose.png',
+  }
 };
 
-const state = {
-  level: 1,
-  orderNumber: 1,
-  completed: 0,
-  current: null,
-  ribbon: [],
-};
+const SPIRITS = Object.keys(IMG.spirits.bottles);
+const BEERS = Object.keys(IMG.beers);
+const MIXERS = Object.keys(IMG.mixers);
+const WINES = Object.keys(IMG.wine).filter(k => ['red','white','rose'].includes(k));
+const WINE_MEASURES = [
+  { key: 'measure125', size: 'small' },
+  { key: 'measure175', size: 'medium' },
+  { key: 'measure250', size: 'large' },
+];
 
 const els = {
   ribbon: document.getElementById('completedRibbon'),
   orderCard: document.getElementById('orderCard'),
   orderVisual: document.getElementById('orderVisual'),
+  columnHeader: document.getElementById('columnHeader'),
   tickBadge: document.getElementById('tickBadge'),
   next: document.getElementById('nextOrderBtn'),
   reset: document.getElementById('resetBtn'),
   level: document.getElementById('levelSelect'),
   modal: document.getElementById('reviewModal'),
-  review: document.getElementById('reviewVisual'),
+  reviewVisual: document.getElementById('reviewVisual'),
+  reviewHeader: document.getElementById('reviewHeader'),
   closeModal: document.getElementById('closeModalBtn'),
 };
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+const state = {
+  level: 1,
+  orderNumber: 1,
+  current: null,
+  ribbon: [],
+};
 
-function makeId() {
-  return Math.random().toString(36).slice(2, 10);
-}
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function maybeIceForSpirit() {
-  return Math.random() < 0.5 ? [{ src: data.extras.ice, cls: 'extra ice' }] : [];
-}
-
-function buildSpiritOrder() {
-  const spirit = pick(data.spirits);
-  const measureType = Math.random() < 0.5 ? 'single' : 'double';
+function makeSpiritOrder(level) {
+  const measure = Math.random() > 0.5 ? 'double' : 'single';
+  const spiritKey = pick(SPIRITS);
+  const extras = [];
+  if ((level === 1 || level === 2) && Math.random() > 0.5) extras.push('ice');
   return {
-    id: makeId(),
-    type: 'spirit',
-    done: false,
-    media: [
-      { src: data.measures[measureType], cls: 'measure' },
-      { src: spirit.src, cls: 'spirit' },
+    kind: 'spirit',
+    columns: [
+      { label: 'Measure', small: '', cls:'measure', items:[{ src: IMG.spirits[measure], imgClass:'measure-img'}] },
+      { label: 'Drink', small: '', cls:'drink', items:[{ src: IMG.spirits.bottles[spiritKey], imgClass:'spirit-img'}] },
+      { label: 'Add', small: extras.length ? 'if needed' : '', cls:'add', extras },
     ],
-    extras: maybeIceForSpirit(),
+    thumb: [IMG.spirits[measure], IMG.spirits.bottles[spiritKey], ...extras.map(k=>IMG.extras[k])],
+    done: false,
   };
 }
 
-function buildBeerOrder() {
-  const beer = pick(data.beers);
+function makeBeerOrder() {
+  const beer = pick(BEERS);
   return {
-    id: makeId(),
-    type: 'beer',
-    done: false,
-    media: [{ src: beer.src, cls: 'beer' }],
-    extras: [],
-  };
-}
-
-function buildMixerOrder() {
-  const spirit = pick(data.spirits);
-  const mixer = pick(data.mixers);
-  const measureType = Math.random() < 0.5 ? 'single' : 'double';
-  return {
-    id: makeId(),
-    type: 'mixer',
-    done: false,
-    media: [
-      { src: data.measures[measureType], cls: 'measure' },
-      { src: spirit.src, cls: 'spirit' },
-      { src: mixer.src, cls: 'mixer' },
+    kind: 'beer',
+    columns: [
+      { label: 'Drink', small: '', cls:'drink', items:[{ src: IMG.beers[beer], imgClass:'beer-img'}] },
     ],
-    extras: [
-      { src: data.extras.ice, cls: 'extra ice' },
-      { src: data.extras.lemon, cls: 'extra lemon' },
-    ],
+    thumb: [IMG.beers[beer]],
+    done:false,
   };
 }
 
-function buildWineOrder() {
-  const wine = pick(data.wines);
+function makeMixerOrder() {
+  const measure = Math.random() > 0.5 ? 'double' : 'single';
+  const spiritKey = pick(SPIRITS);
+  const mixerKey = pick(MIXERS);
+  const extras = ['ice','lemon'];
   return {
-    id: makeId(),
-    type: 'wine',
-    done: false,
-    media: [{ src: wine.src, cls: 'wine' }],
-    extras: [],
+    kind: 'mixer',
+    columns: [
+      { label: 'Measure', cls:'measure', items:[{ src: IMG.spirits[measure], imgClass:'measure-img'}] },
+      { label: 'Spirit', cls:'drink', items:[{ src: IMG.spirits.bottles[spiritKey], imgClass:'spirit-img'}] },
+      { label: 'Mixer', cls:'mixer', items:[{ src: IMG.mixers[mixerKey], imgClass:'mixer-img'}] },
+      { label: 'Add', cls:'add', extras },
+    ],
+    thumb: [IMG.spirits[measure], IMG.spirits.bottles[spiritKey], IMG.mixers[mixerKey], ...extras.map(k=>IMG.extras[k])],
+    done:false,
   };
 }
 
-function chooseOrderByLevel(level) {
-  if (level === 1) return buildSpiritOrder();
-  if (level === 2) return Math.random() < 0.65 ? buildSpiritOrder() : buildBeerOrder();
-  if (level === 3) return pick([buildSpiritOrder, buildBeerOrder, buildMixerOrder])();
-  return pick([buildSpiritOrder, buildBeerOrder, buildMixerOrder, buildWineOrder])();
+function makeWineOrder() {
+  const measure = pick(WINE_MEASURES);
+  const wine = pick(WINES);
+  return {
+    kind: 'wine',
+    columns: [
+      { label: 'Measure', small: measure.size, cls:'measure', items:[{ src: IMG.wine[measure.key], imgClass:'measure-img'}] },
+      { label: 'Wine', small: '', cls:'wine', items:[{ src: IMG.wine[wine], imgClass:'wine-img'}] },
+    ],
+    thumb: [IMG.wine[measure.key], IMG.wine[wine]],
+    done:false,
+  };
 }
 
-function createAsset(entry) {
+function makeOrder(level) {
+  const pool = ['spirit'];
+  if (level >= 2) pool.push('beer');
+  if (level >= 3) pool.push('mixer');
+  if (level >= 4) pool.push('wine');
+  const kind = pick(pool);
+  if (kind === 'beer') return makeBeerOrder();
+  if (kind === 'mixer') return makeMixerOrder();
+  if (kind === 'wine') return makeWineOrder();
+  return makeSpiritOrder(level);
+}
+
+function renderHeaders(target, order) {
+  target.innerHTML = '';
+  target.style.gridTemplateColumns = order.columns.map(c => gridFor(c.cls)).join(' ');
+  order.columns.forEach(col => {
+    const cell = document.createElement('div');
+    cell.className = 'header-cell';
+    const main = document.createElement('div');
+    main.textContent = col.label;
+    cell.appendChild(main);
+    if (col.small) {
+      const small = document.createElement('small');
+      small.textContent = col.small;
+      cell.appendChild(small);
+    }
+    target.appendChild(cell);
+  });
+}
+
+function gridFor(cls) {
+  if (cls === 'measure') return '1fr';
+  if (cls === 'add') return '1fr';
+  if (cls === 'mixer') return '1.15fr';
+  if (cls === 'wine') return '2.1fr';
+  if (cls === 'drink') return '1.35fr';
+  return '1fr';
+}
+
+function makeImg(src, klass) {
   const img = document.createElement('img');
-  img.src = entry.src;
+  img.src = src;
+  img.className = `asset ${klass || ''}`.trim();
   img.alt = '';
-  img.className = `asset ${entry.cls}`;
   return img;
 }
 
-function buildVisual(target, order) {
+function renderVisual(target, order) {
   target.innerHTML = '';
-  target.className = `${target.id === 'reviewVisual' ? 'review-visual' : 'order-visual'} mode-${order.type}`;
-
-  const wrap = document.createElement('div');
-  wrap.className = 'visual-wrap';
-
-  const main = document.createElement('div');
-  main.className = 'visual-main';
-
-  const measureEntry = order.media.find(entry => entry.cls === 'measure');
-  const otherEntries = order.media.filter(entry => entry.cls !== 'measure');
-
-  if (measureEntry) {
-    const measureBox = document.createElement('div');
-    measureBox.className = 'measure-corner';
-    measureBox.appendChild(createAsset(measureEntry));
-    main.appendChild(measureBox);
-  }
-
-  const drinksRow = document.createElement('div');
-  drinksRow.className = 'drinks-row';
-  otherEntries.forEach(entry => drinksRow.appendChild(createAsset(entry)));
-  main.appendChild(drinksRow);
-
-  wrap.appendChild(main);
-
-  if (order.extras && order.extras.length) {
-    const extras = document.createElement('div');
-    extras.className = 'visual-extras';
-
-    order.extras.forEach(entry => {
-      const item = document.createElement('div');
-      item.className = 'extra-item';
-
-      const plus = document.createElement('span');
-      plus.className = 'plus-sign';
-      plus.textContent = '+';
-      item.appendChild(plus);
-      item.appendChild(createAsset(entry));
-      extras.appendChild(item);
-    });
-
-    wrap.appendChild(extras);
-  }
-
-  target.appendChild(wrap);
+  target.style.gridTemplateColumns = order.columns.map(c => gridFor(c.cls)).join(' ');
+  order.columns.forEach(col => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if (col.extras) {
+      if (!col.extras.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-add';
+        empty.textContent = '';
+        cell.appendChild(empty);
+      } else {
+        const stack = document.createElement('div');
+        stack.className = 'extras-stack';
+        col.extras.forEach(extra => {
+          const item = document.createElement('div');
+          item.className = 'extra-item';
+          const plus = document.createElement('span');
+          plus.className = 'plus';
+          plus.textContent = '+';
+          item.appendChild(plus);
+          item.appendChild(makeImg(IMG.extras[extra], ''));
+          stack.appendChild(item);
+        });
+        cell.appendChild(stack);
+      }
+    } else {
+      const wrap = document.createElement('div');
+      wrap.className = 'asset-wrap';
+      col.items.forEach(item => wrap.appendChild(makeImg(item.src, item.imgClass)));
+      cell.appendChild(wrap);
+    }
+    target.appendChild(cell);
+  });
 }
 
 function renderCurrent() {
-  buildVisual(els.orderVisual, state.current);
+  renderHeaders(els.columnHeader, state.current);
+  renderVisual(els.orderVisual, state.current);
   els.orderCard.classList.toggle('done', state.current.done);
   els.next.disabled = !state.current.done;
 }
 
 function renderRibbon() {
   els.ribbon.innerHTML = '';
-  els.ribbon.classList.toggle('empty', state.ribbon.length === 0);
-
-  state.ribbon.forEach(item => {
+  state.ribbon.forEach((order, index) => {
     const thumb = document.createElement('button');
     thumb.type = 'button';
-    thumb.className = 'ribbon-thumb';
-    thumb.setAttribute('aria-label', `Review order ${item.orderNumber}`);
-
-    const thumbEntries = [...item.media, ...(item.extras || [])].slice(0, 4);
-    thumbEntries.forEach(entry => {
+    thumb.className = 'thumb';
+    const track = document.createElement('div');
+    track.className = 'thumb-track';
+    order.thumb.forEach((src, i) => {
+      if (i > 0 && order.isExtraMarker && false) {}
       const img = document.createElement('img');
-      img.src = entry.src;
+      img.src = src;
       img.alt = '';
-      if (entry.cls.includes('measure')) img.classList.add('thumb-measure');
-      if (entry.cls.includes('extra')) img.classList.add('thumb-extra');
-      thumb.appendChild(img);
+      track.appendChild(img);
     });
-
-    const bubble = document.createElement('span');
-    bubble.className = 'ribbon-number';
-    bubble.textContent = `#${item.orderNumber}`;
-    thumb.appendChild(bubble);
-
-    thumb.addEventListener('click', () => openReview(item));
+    thumb.appendChild(track);
+    const id = document.createElement('div');
+    id.className = 'thumb-id';
+    id.textContent = `#${order.number}`;
+    thumb.appendChild(id);
+    thumb.addEventListener('click', () => openReview(order));
     els.ribbon.appendChild(thumb);
   });
-}
-
-function newOrder() {
-  state.current = chooseOrderByLevel(state.level);
-  renderCurrent();
 }
 
 function completeCurrent() {
   if (state.current.done) return;
   state.current.done = true;
-  state.completed += 1;
-  state.ribbon.unshift({
-    orderNumber: state.orderNumber,
-    type: state.current.type,
-    media: state.current.media.map(x => ({ ...x })),
-    extras: (state.current.extras || []).map(x => ({ ...x })),
-  });
+  state.ribbon.unshift({ ...state.current, number: state.orderNumber });
   renderRibbon();
   renderCurrent();
 }
 
-function nextOrder() {
-  if (!state.current.done) return;
+function newOrder() {
+  state.current = makeOrder(state.level);
   state.orderNumber += 1;
-  newOrder();
+  renderCurrent();
 }
 
 function resetApp() {
   state.orderNumber = 1;
-  state.completed = 0;
   state.ribbon = [];
-  renderRibbon();
   closeReview();
+  renderRibbon();
   newOrder();
 }
 
 function openReview(order) {
-  buildVisual(els.review, order);
-  els.modal.classList.add('open');
+  renderHeaders(els.reviewHeader, order);
+  renderVisual(els.reviewVisual, order);
   els.modal.setAttribute('aria-hidden', 'false');
 }
-
-function closeReview() {
-  els.modal.classList.remove('open');
-  els.modal.setAttribute('aria-hidden', 'true');
-}
+function closeReview() { els.modal.setAttribute('aria-hidden', 'true'); }
 
 els.orderCard.addEventListener('click', completeCurrent);
-els.next.addEventListener('click', nextOrder);
+els.next.addEventListener('click', () => { if (!els.next.disabled) newOrder(); });
 els.reset.addEventListener('click', resetApp);
-els.level.addEventListener('change', () => {
-  state.level = Number(els.level.value);
-  resetApp();
-});
+els.level.addEventListener('change', (e) => { state.level = Number(e.target.value); resetApp(); });
 els.closeModal.addEventListener('click', closeReview);
-els.modal.addEventListener('click', event => {
-  if (event.target.dataset.close === 'true') closeReview();
-});
-window.addEventListener('keydown', event => {
-  if (event.key === 'Escape') closeReview();
-});
+document.querySelector('[data-close="true"]').addEventListener('click', closeReview);
 
-els.level.value = '1';
-renderRibbon();
-newOrder();
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeReview(); });
+
+resetApp();
