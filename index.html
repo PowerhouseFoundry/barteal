@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Drinks Orders</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="device-frame">
+    <div class="app-shell">
+      <header class="top-bar">
+        <div class="brand-group">
+          <div class="brand-badge">BAR</div>
+          <div class="brand-title">Drinks Orders</div>
+        </div>
+
+        <div class="top-actions">
+          <select id="levelSelect" class="level-select" aria-label="Select level">
+            <option value="1">Level 1</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+          </select>
+          <button id="resetBtn" class="reset-btn" type="button" aria-label="Reset app">Reset</button>
+        </div>
+      </header>
+
+      <section class="ribbon-panel" aria-label="Completed orders">
+        <div id="completedRibbon" class="completed-ribbon"></div>
+      </section>
+
+      <main class="stage-panel">
+        <button id="orderCard" class="order-card" type="button" aria-label="Current order">
+          <div id="tickBadge" class="tick-badge">✓</div>
+          <div id="orderVisual" class="order-visual"></div>
+        </button>
+      </main>
+
+      <footer class="bottom-panel">
+        <div class="bottom-status">
+          <div class="counter-tile">
+            <div class="counter-label">Done</div>
+            <div id="doneCount" class="counter-value">0</div>
+          </div>
+          <div class="counter-tile">
+            <div class="counter-label">Order</div>
+            <div id="orderCount" class="counter-value">1</div>
+          </div>
+        </div>
+
+        <button id="nextOrderBtn" class="next-order-btn" type="button" disabled>NEXT ORDER</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="reviewModal" class="modal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="true"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-label="Completed order review">
+      <div class="modal-top">
+        <div class="modal-title">Completed order</div>
+        <button id="closeModalBtn" class="reset-btn" type="button">Close</button>
+      </div>
+      <div id="reviewVisual" class="review-visual"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
