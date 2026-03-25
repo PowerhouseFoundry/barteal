@@ -138,6 +138,24 @@ function buildVisual(target, order) {
   wrap.className = 'visual-wrap';
 
   const main = document.createElement('div');
+  main.className = 'visual-main';
+
+  const measureEntry = order.media.find(entry => entry.cls === 'measure');
+  const otherEntries = order.media.filter(entry => entry.cls !== 'measure');
+
+  if (measureEntry) {
+    const measureBox = document.createElement('div');
+    measureBox.className = 'measure-corner';
+    measureBox.appendChild(createAsset(measureEntry));
+    main.appendChild(measureBox);
+  }
+
+  const drinksRow = document.createElement('div');
+  drinksRow.className = 'drinks-row';
+  otherEntries.forEach(entry => drinksRow.appendChild(createAsset(entry)));
+  main.appendChild(drinksRow);
+
+  wrap.appendChild(main);
 
   if (order.extras && order.extras.length) {
     const extras = document.createElement('div');

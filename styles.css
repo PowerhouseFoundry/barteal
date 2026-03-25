@@ -329,10 +329,9 @@ button, select { font: inherit; }
 }
 
 .bottom-panel {
-  padding: 8px 16px 12px;
-  display: grid;
-  grid-template-rows: 34px 1fr;
-  gap: 8px;
+  padding: 10px 16px 16px;
+  display: flex;
+  align-items: center;
 }
 
 .bottom-status {
