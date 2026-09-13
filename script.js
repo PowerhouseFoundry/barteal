@@ -18,6 +18,8 @@ const IMG = {
     corona: 'images/drinks/beers/corona.png',
     desperado: 'images/drinks/beers/desperado.png',
     madri: 'images/drinks/beers/madri.png',
+    pacifico: 'images/drinks/beers/pacifico.png',
+    pint: 'images/drinks/beers/pint.png',
   },
   mixers: {
     coke: 'images/drinks/mixers/coke.png',
